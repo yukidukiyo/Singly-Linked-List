@@ -1,10 +1,12 @@
 ;単方向リスト
 ;singly linked list
-#define sladd(%1,%2=0,%3) p3=%3:\
+#define global sladd(%1,%2=0,%3) p3=%3:\
 if vartype(p3)=2{_sladd2 %1,%2,p3}\
 else:if vartype(p3)=3{_sladd3 %1,%2,p3}\
 else:if vartype(p3)=4{_sladd4 %1,%2,p3}\
 else{dialog"呼び出し先の関数が存在しません"}
+#define global ctype slget(%1,%2,%3=0) _slget(%1,%2,%3)
+#define global ctype sllength(%1,%2=0) _sllength(%1,%2)
 #module
 #const null -1
 #const vt_s 2
@@ -83,7 +85,7 @@ else{dialog"呼び出し先の関数が存在しません"}
 	arr(a_headedid,id)=getid
 	arr(a_len,id)++
 	return
-#defcfunc slget array arr,int memid,int id
+#defcfunc _slget array arr,int memid,int id
 	if arr(a_len,id)<=memid{
 		dialog"指定したリストの要素数が最大値を超えています。",1
 		end
@@ -113,7 +115,7 @@ else{dialog"呼び出し先の関数が存在しません"}
 		dialog"変数の型が存在しません。",1
 		end
 	}
-#defcfunc sllength array arr,int id
+#defcfunc _sllength array arr,int id
 	return arr(a_len,id)
 #global
 slinit
