@@ -71,15 +71,14 @@ else{dialog"ŒÄ‚Ño‚µæ‚ÌŠÖ”‚ª‘¶İ‚µ‚Ü‚¹‚ñ"}
 	if length2(arr)<=id{
 		arr(a_headstid,id)=0
 	}
+	getid=headlistid
 	if arr(a_len,id)<=0{
-		getid=headlistid
 		arr(a_headstid,id)=getid
 		arr(a_len,id)=0
 		arr(a_nextct,id)=0
 		arr(a_nextheadid,id)=getid
 	}else{
 		headlist(h_nextheadid,arr(a_headedid,id))=headlistid
-		getid=headlistid
 	}
 	headlistid++
 	arr(a_headedid,id)=getid
@@ -93,7 +92,7 @@ else{dialog"ŒÄ‚Ño‚µæ‚ÌŠÖ”‚ª‘¶İ‚µ‚Ü‚¹‚ñ"}
 	if arr(a_nextct,id)=memid{
 		getid=arr(a_nextheadid,id)
 	}else{
-		getid=arr(getid,id)
+		getid=arr(0,id)
 		repeat memid
 			getid=headlist(h_nextheadid,getid)
 		loop
