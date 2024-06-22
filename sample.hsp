@@ -1,0 +1,20 @@
+#include "sll.hsp"
+
+sllist arr
+repeat 8
+	sladd arr,,cnt
+loop
+repeat 4
+	sladd arr,1,4.1+cnt
+loop
+repeat 5
+	sladd arr,2,"a"+cnt
+loop
+
+repeat length2(arr):c1=cnt
+	h=""
+	repeat sllength(arr,cnt)
+		h+=""+slget(arr,cnt,c1)+", "
+	loop
+	mes""+h
+loop

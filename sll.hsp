@@ -1,0 +1,119 @@
+;単方向リスト
+;singly linked list
+#define sladd(%1,%2=0,%3) p3=%3:\
+if vartype(p3)=2{_sladd2 %1,%2,p3}\
+else:if vartype(p3)=3{_sladd3 %1,%2,p3}\
+else:if vartype(p3)=4{_sladd4 %1,%2,p3}\
+else{dialog"呼び出し先の関数が存在しません"}
+#module
+#const null -1
+#const vt_s 2
+#const vt_d 3
+#const vt_i 4
+#enum a_headstid=0
+#enum a_headedid
+#enum a_len
+#enum a_nextct
+#enum a_nextheadid
+#enum a_max
+#enum h_vartype=0
+#enum h_varid
+#enum h_nextheadid
+#enum h_max
+#deffunc slinit
+	dim headlist,h_max,1
+	headlistid=0
+	dim intlist
+	intlistid=0
+	ddim dbllist
+	dbllistid=0
+	sdim strlist
+	strlistid=0
+	return
+#deffunc sllist array arr,int num
+	if num<=0{
+		t_num=1
+	}else{
+		t_num=num
+	}
+	dim arr,a_max,t_num
+	return
+#deffunc _sladd2 array arr,int id,str setval
+	_sladdcommon arr,id
+	headlist(h_vartype,getid)=vt_s
+	headlist(h_varid,getid)=strlistid
+	headlist(h_nextheadid,getid)=null
+	strlist(strlistid)=setval
+	strlistid++
+	return
+#deffunc _sladd3 array arr,int id,double setval
+	_sladdcommon arr,id
+	headlist(h_vartype,getid)=vt_d
+	headlist(h_varid,getid)=dbllistid
+	headlist(h_nextheadid,getid)=null
+	dbllist(dbllistid)=setval
+	dbllistid++
+	return
+#deffunc _sladd4 array arr,int id,int setval
+	_sladdcommon arr,id
+	headlist(h_vartype,getid)=vt_i
+	headlist(h_varid,getid)=intlistid
+	headlist(h_nextheadid,getid)=null
+	intlist(intlistid)=setval
+	intlistid++
+	return
+#deffunc _sladdcommon array arr,int id
+	if length(arr)<2{
+		dim arr,2,1
+	}
+	if length2(arr)<=id{
+		arr(a_headstid,id)=0
+	}
+	if arr(a_len,id)<=0{
+		getid=headlistid
+		arr(a_headstid,id)=getid
+		arr(a_len,id)=0
+		arr(a_nextct,id)=0
+		arr(a_nextheadid,id)=getid
+	}else{
+		headlist(h_nextheadid,arr(a_headedid,id))=headlistid
+		getid=headlistid
+	}
+	headlistid++
+	arr(a_headedid,id)=getid
+	arr(a_len,id)++
+	return
+#defcfunc slget array arr,int memid,int id
+	if arr(a_len,id)<=memid{
+		dialog"指定したリストの要素数が最大値を超えています。",1
+		end
+	}
+	if arr(a_nextct,id)=memid{
+		getid=arr(a_nextheadid,id)
+	}else{
+		getid=arr(getid,id)
+		repeat memid
+			getid=headlist(h_nextheadid,getid)
+		loop
+	}
+	if arr(a_len,id)<=memid+1{
+		arr(a_nextct,id)=0
+		arr(a_nextheadid,id)=arr(a_headstid,id)
+	}else{
+		arr(a_nextct,id)=memid+1
+		arr(a_nextheadid,id)=headlist(h_nextheadid,getid)
+	}
+	if headlist(h_vartype,getid)=vt_s{
+		return strlist(headlist(h_varid,getid))
+	}else:if headlist(h_vartype,getid)=vt_d{
+		return dbllist(headlist(h_varid,getid))
+	}else:if headlist(h_vartype,getid)=vt_i{
+		return intlist(headlist(h_varid,getid))
+	}else{
+		dialog"変数の型が存在しません。",1
+		end
+	}
+#defcfunc sllength array arr,int id
+	return arr(a_len,id)
+#global
+slinit
