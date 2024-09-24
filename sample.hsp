@@ -7,11 +7,14 @@ repeat 8
 	sladd arr,,cnt
 loop
 repeat 4
-	sladd arr,1,4.1+cnt
+	sladd arr,1,0.5+cnt
 loop
 repeat 5
 	sladd arr,2,"a"+cnt
 loop
+slupd arr,2,1,"aa"
+slins arr,2,0,"bbb"
+sldel arr,1,2
 ;Ši”[‚µ‚½’l‚ð‘S‚Ä•\Ž¦
 repeat length2(arr):c1=cnt
 	h=""

@@ -6,6 +6,17 @@ else:if vartype(p3)=3{_sladd3 %1,%2,p3}\
 else:if vartype(p3)=4{_sladd4 %1,%2,p3}\
 else{dialog"呼び出し先の関数が存在しません"}
 #define global ctype slget(%1,%2,%3=0) _slget(%1,%2,%3)
+#define global slupd(%1,%2,%3,%4) p4=%4:\
+if vartype(p4)=2{_slupd2 %1,%2,%3,p4}\
+else:if vartype(p4)=3{_slupd3 %1,%2,%3,p4}\
+else:if vartype(p4)=4{_slupd4 %1,%2,%3,p4}\
+else{dialog"呼び出し先の関数が存在しません"}
+#define global slins(%1,%2,%3,%4) p4=%4:\
+if vartype(p4)=2{_slins2 %1,%2,%3,p4}\
+else:if vartype(p4)=3{_slins3 %1,%2,%3,p4}\
+else:if vartype(p4)=4{_slins4 %1,%2,%3,p4}\
+else{dialog"呼び出し先の関数が存在しません"}
+#define global sldel(%1,%2,%3=0) _sldel %1,%2,%3
 #define global ctype sllength(%1,%2=0) _sllength(%1,%2)
 #module
 #const null -1
@@ -24,13 +35,17 @@ else{dialog"呼び出し先の関数が存在しません"}
 #enum h_max
 #deffunc slinit
 	dim headlist,h_max,1
-	headlistid=0
+	dim headstack
+	headstackid=0
 	dim intlist
-	intlistid=0
+	dim intstack
+	intstackid=0
 	ddim dbllist
-	dbllistid=0
+	dim dblstack
+	dblstackid=0
 	sdim strlist
-	strlistid=0
+	dim strstack
+	strstackid=0
 	return
 #deffunc sllist array arr,int num
 	if num<=0{
@@ -42,46 +57,37 @@ else{dialog"呼び出し先の関数が存在しません"}
 	return
 #deffunc _sladd2 array arr,int id,str setval
 	_sladdcommon arr,id
-	headlist(h_vartype,getid)=vt_s
-	headlist(h_varid,getid)=strlistid
-	headlist(h_nextheadid,getid)=null
-	strlist(strlistid)=setval
-	strlistid++
+	headlist(h_nextheadid,curid)=null
+	setstrlist setval
 	return
 #deffunc _sladd3 array arr,int id,double setval
 	_sladdcommon arr,id
-	headlist(h_vartype,getid)=vt_d
-	headlist(h_varid,getid)=dbllistid
-	headlist(h_nextheadid,getid)=null
-	dbllist(dbllistid)=setval
-	dbllistid++
+	headlist(h_nextheadid,curid)=null
+	setdbllist setval
 	return
 #deffunc _sladd4 array arr,int id,int setval
 	_sladdcommon arr,id
-	headlist(h_vartype,getid)=vt_i
-	headlist(h_varid,getid)=intlistid
-	headlist(h_nextheadid,getid)=null
-	intlist(intlistid)=setval
-	intlistid++
+	headlist(h_nextheadid,curid)=null
+	setintlist setval
 	return
 #deffunc _sladdcommon array arr,int id
-	if length(arr)<2{
-		dim arr,2,1
+	if length(arr)<a_max{
+		sllist arr
 	}
 	if length2(arr)<=id{
-		arr(a_headstid,id)=0
+		arr(a_headstid,id)=null
+		arr(a_len,id)=0
 	}
-	getid=headlistid
+	getheadstackid
 	if arr(a_len,id)<=0{
-		arr(a_headstid,id)=getid
+		arr(a_headstid,id)=curid
 		arr(a_len,id)=0
 		arr(a_nextct,id)=0
-		arr(a_nextheadid,id)=getid
+		arr(a_nextheadid,id)=curid
 	}else{
-		headlist(h_nextheadid,arr(a_headedid,id))=headlistid
+		headlist(h_nextheadid,arr(a_headedid,id))=curid
 	}
-	headlistid++
-	arr(a_headedid,id)=getid
+	arr(a_headedid,id)=curid
 	arr(a_len,id)++
 	return
 #defcfunc _slget array arr,int memid,int id
@@ -89,32 +95,193 @@ else{dialog"呼び出し先の関数が存在しません"}
 		dialog"指定したリストの要素数が最大値を超えています。",1
 		end
 	}
-	if arr(a_nextct,id)=memid{
-		getid=arr(a_nextheadid,id)
-	}else{
-		getid=arr(0,id)
-		repeat memid
-			getid=headlist(h_nextheadid,getid)
-		loop
-	}
+	getcurid arr,memid,id
 	if arr(a_len,id)<=memid+1{
 		arr(a_nextct,id)=0
 		arr(a_nextheadid,id)=arr(a_headstid,id)
 	}else{
 		arr(a_nextct,id)=memid+1
-		arr(a_nextheadid,id)=headlist(h_nextheadid,getid)
+		arr(a_nextheadid,id)=headlist(h_nextheadid,curid)
 	}
-	if headlist(h_vartype,getid)=vt_s{
-		return strlist(headlist(h_varid,getid))
-	}else:if headlist(h_vartype,getid)=vt_d{
-		return dbllist(headlist(h_varid,getid))
-	}else:if headlist(h_vartype,getid)=vt_i{
-		return intlist(headlist(h_varid,getid))
+	if headlist(h_vartype,curid)=vt_s{
+		return strlist(headlist(h_varid,curid))
+	}else:if headlist(h_vartype,curid)=vt_d{
+		return dbllist(headlist(h_varid,curid))
 	}else{
-		dialog"変数の型が存在しません。",1
+		return intlist(headlist(h_varid,curid))
+	}
+#deffunc _slupd2 array arr,int memid,int id,str setval
+	getcurid arr,memid,id
+	if headlist(h_vartype,curid)=vt_s{
+		strlist(headlist(h_varid,curid))=setval
+	}else:if headlist(h_vartype,curid)=vt_d{
+		dblstackid++
+		dblstack(dblstackid)=headlist(h_varid,curid)
+		setstrlist setval
+	}else{
+		intstackid++
+		intstack(intstackid)=headlist(h_varid,curid)
+		setstrlist setval
+	}
+	return
+#deffunc _slupd3 array arr,int memid,int id,double setval
+	getcurid arr,memid,id
+	if headlist(h_vartype,curid)=vt_s{
+		strstackid++
+		strstack(strstackid)=headlist(h_varid,curid)
+		setdbllist setval
+	}else:if headlist(h_vartype,curid)=vt_d{
+		dbllist(headlist(h_varid,curid))=setval
+	}else{
+		intstackid++
+		intstack(intstackid)=headlist(h_varid,curid)
+		setdbllist setval
+	}
+	return
+#deffunc _slupd4 array arr,int memid,int id,int setval
+	getcurid arr,memid,id
+	if headlist(h_vartype,curid)=vt_s{
+		strstackid++
+		strstack(strstackid)=headlist(h_varid,curid)
+		setintlist setval
+	}else:if headlist(h_vartype,curid)=vt_d{
+		dblstackid++
+		dblstack(dblstackid)=headlist(h_varid,curid)
+		setintlist setval
+	}else{
+		intlist(headlist(h_varid,curid))=setval
+	}
+	return
+#deffunc _slins2 array arr,int memid,int id,str setval
+	getbefcurid arr,memid,id
+	headlist(h_nextheadid,headstack(headstackid))=curid
+	getheadstackid
+	setstrlist setval
+	arr(a_nextct,id)=memid
+	arr(a_nextheadid,id)=curid
+	if memid=0{
+		arr(a_headstid,id)=curid
+	}else{
+		headlist(h_nextheadid,befid)=curid
+	}
+	return
+#deffunc _slins3 array arr,int memid,int id,double setval
+	getbefcurid arr,memid,id
+	headlist(h_nextheadid,headstack(headstackid))=curid
+	getheadstackid
+	setdbllist setval
+	arr(a_nextct,id)=memid
+	arr(a_nextheadid,id)=curid
+	if memid=0{
+		arr(a_headstid,id)=curid
+	}else{
+		headlist(h_nextheadid,befid)=curid
+	}
+	return
+#deffunc _slins4 array arr,int memid,int id,int setval
+	getbefcurid arr,memid,id
+	headlist(h_nextheadid,headstack(headstackid))=curid
+	getheadstackid
+	setintlist setval
+	arr(a_nextct,id)=memid
+	arr(a_nextheadid,id)=curid
+	if memid=0{
+		arr(a_headstid,id)=curid
+	}else{
+		headlist(h_nextheadid,befid)=curid
+	}
+	return
+#deffunc _sldel array arr,int memid,int id
+	if arr(a_len,id)<=memid{
+		dialog"指定したリストの要素数が最大値を超えています。",1
 		end
 	}
+	getbefcurid arr,memid,id
+	if memid=0{
+		arr(a_headstid,id)=headlist(h_nextheadid,curid)
+	}else:if memid=arr(a_len,id)-1{
+		headlist(h_nextheadid,befid)=headlist(h_nextheadid,curid)
+		arr(a_headedid,id)=befid
+	}else{
+		headlist(h_nextheadid,befid)=headlist(h_nextheadid,curid)
+	}
+	arr(a_len,id)--
+	arr(a_nextct,id)=limit(memid,0,arr(a_len,id)-1)
+	arr(a_nextheadid,id)=headlist(h_nextheadid,curid)
+	headstackid++
+	headstack(headstackid)=curid
+	if headlist(h_vartype,curid)=vt_s{
+		strstackid++
+		strstack(strstackid)=headlist(h_varid,curid)
+	}else:if headlist(h_vartype,curid)=vt_d{
+		dblstackid++
+		dblstack(dblstackid)=headlist(h_varid,curid)
+	}else{
+		intstackid++
+		intstack(intstackid)=headlist(h_varid,curid)
+	}
+	return
 #defcfunc _sllength array arr,int id
 	return arr(a_len,id)
+#deffunc getheadstackid
+	curid=headstack(headstackid)
+	if headstackid>0{
+		headstackid--
+	}else{
+		headstack(headstackid)++
+	}
+	return
+#deffunc getcurid array arr,int memid,int id
+	if arr(a_nextct,id)=memid{
+		curid=arr(a_nextheadid,id)
+	}else{
+		curid=arr(a_headstid,id)
+		repeat memid
+			curid=headlist(h_nextheadid,curid)
+		loop
+	}
+	return
+#deffunc getbefcurid array arr,int memid,int id
+	befid=null
+	if arr(a_nextct,id)=memid{
+		curid=arr(a_nextheadid,id)
+	}else{
+		curid=arr(a_headstid,id)
+		repeat memid
+			befid=curid
+			curid=headlist(h_nextheadid,curid)
+		loop
+	}
+	return
+#deffunc setstrlist str setval
+	headlist(h_vartype,curid)=vt_s
+	headlist(h_varid,curid)=strstack(strstackid)
+	strlist(strstack(strstackid))=setval
+	if strstackid>0{
+		strstackid--
+	}else{
+		strstack(strstackid)++
+	}
+	return
+#deffunc setdbllist double setval
+	headlist(h_vartype,curid)=vt_d
+	headlist(h_varid,curid)=dblstack(dblstackid)
+	dbllist(dblstack(dblstackid))=setval
+	if dblstackid>0{
+		dblstackid--
+	}else{
+		dblstack(dblstackid)++
+	}
+	return
+#deffunc setintlist int setval
+	headlist(h_vartype,curid)=vt_i
+	headlist(h_varid,curid)=intstack(intstackid)
+	intlist(intstack(intstackid))=setval
+	if intstackid>0{
+		intstackid--
+	}else{
+		intstack(intstackid)++
+	}
+	return
 #global
 slinit
