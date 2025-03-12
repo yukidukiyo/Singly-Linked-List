@@ -21,6 +21,7 @@ else:if vartype(p4)=4{_slins4 %1,%2,%3,p4}\
 else{dialog"ŒÄ‚Ño‚µæ‚ÌŠÖ”‚ª‘¶İ‚µ‚Ü‚¹‚ñ"}
 #define global sldel(%1,%2,%3=0) _sldel %1,%2,%3
 #define global ctype sllength(%1,%2=0) _sllength(%1,%2)
+#define global ctype sllength2(%1) _sllength2(%1)
 
 #module
 #const null -1
@@ -206,6 +207,8 @@ else{dialog"ŒÄ‚Ño‚µæ‚ÌŠÖ”‚ª‘¶İ‚µ‚Ü‚¹‚ñ"}
 ;’·‚³
 #defcfunc _sllength array mr_arr,int m_id
 	return mr_arr(a_len,m_id)
+#defcfunc _sllength2 array mr_arr
+	return length2(mr_arr)
 ;“à•”ŠÖ”
 #deffunc slinscommon array mr_arr,int m_memid,int m_id
 	mr_arr(a_nextct,m_id)=m_memid

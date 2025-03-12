@@ -16,7 +16,7 @@ slins arr,2,0,"bbb"
 slupd arr,2,1,"aa"
 sldel arr,1,2
 ;Ši”[‚µ‚½’l‚ğ‘S‚Ä•\¦
-repeat length2(arr):c1=cnt
+repeat sllength2(arr):c1=cnt
 	h=""
 	repeat sllength(arr,cnt)
 		h+=""+slget(arr,cnt,c1)+", "
