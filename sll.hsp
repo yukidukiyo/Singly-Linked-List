@@ -206,7 +206,17 @@ else{dialog"呼び出し先の関数が存在しません"}
 	return
 ;長さ
 #defcfunc _sllength array mr_arr,int m_id
-	return mr_arr(a_len,m_id)
+	if length2(mr_arr)>m_id{
+		if mr_arr(a_len,m_id)>0{
+			return mr_arr(a_len,m_id)
+		}else{
+			dialog"リストの要素数が無効です。",1
+			end
+		}
+	}else{
+		dialog"リストの要素数が無効です。",1
+		end
+	}
 #defcfunc _sllength2 array mr_arr
 	return length2(mr_arr)
 ;内部関数
